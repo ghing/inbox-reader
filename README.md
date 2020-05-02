@@ -1,40 +1,78 @@
-*Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
+# Inbox Reader
 
----
+A tool to make it easier to track reporting communications and public records requests from my inbox.
 
-# svelte app
+Also an opportunity to try out [Svelte](https://svelte.dev).
 
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
+This project was started using [Svelte's template][https://github.com/sveltejs/template].
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
+## Design research
 
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
+I'm really trying to not make a FOIA tracker or CRM and just focus on getting email into those systems.
+
+Must haves:
+
+- Ability to read an inbox
+- Ability to query and create records in AirTable
+- Minimal hosting complexity
+
+Nice to have:
+
+- Work directly with my work Outlook inbox
+- Do everything client side
+
+Future vision:
+
+- Ability to support multiple inbox sources
+- Ability to push to multiple backends such as AirTable, Google Sheets and MuckRock 
+
+I had considered an email-based approach, similar to early functionality of FOIA machine.
+
+AirTable [suggests](https://airtable.com/integrations/email) using Zapier for email integration. There are a number of services that offer webhook integration.
+
+However, I wanted to minimize the complexity of the stack. I also feel like there are some manual steps needed for contact creation which would be hard to detect through emal injection.
+
+I originally tried to access my Outlook inbox directly, but didn't have permissions to access that with an app. I'm going to get this working using GMail first and then maybe I can implement plugable inbox sources.
+
+### AirTable integration
+
+I've found AirTable works really well for tracking my records requests and communications. It also has an API that supports most of what I will need to do in order to create records from my app.
+
+- [Creating rows](https://airtable.com/appHowQq4B3ZxfLro/api/docs#curl/table:communications:create)
+- [Lookup rows](https://airtable.com/appHowQq4B3ZxfLro/api/docs#curl/table:communications:list)
+    - The list endpoint also accepts spreadsheet function-like functions (https://support.airtable.com/hc/en-us/articles/203255215-Formula-Field-Reference#text) which can be used to filter the results.  The `SEARCH` function might be helpful.
+
+## Assumptions
+
+- Node.js
+
+## Installation
+
+Clone the repository.
+
+Then change into the project directory:
+
+```
+cd inbox-reader
 ```
 
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+Then install JavaScript dependencies:
 
-
-## Get started
-
-Install the dependencies...
-
-```bash
-cd svelte-app
+```
 npm install
 ```
 
-...then start [Rollup](https://rollupjs.org):
+## Running the development server
+
+This uses [Rollup](https://rollupjs.org):
 
 ```bash
 npm run dev
 ```
 
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
+Navigate to [localhost:5000](http://localhost:5000).
 
 By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
 
 ## Building and running in production mode
 
@@ -46,7 +84,6 @@ npm run build
 
 You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
 
-
 ## Single-page app mode
 
 By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
@@ -57,8 +94,11 @@ If you're building a single-page app (SPA) with multiple routes, sirv needs to b
 "start": "sirv public --single"
 ```
 
+This is how I've configured the app currently, because I'm using Page.js as a router.
 
 ## Deploying to the web
+
+TODO: Figure out which of these methods best meets my needs.
 
 ### With [now](https://zeit.co/now)
 
