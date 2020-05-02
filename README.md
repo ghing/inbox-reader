@@ -45,6 +45,7 @@ I've found AirTable works really well for tracking my records requests and commu
 ## Assumptions
 
 - Node.js
+- Credentials and application for Google APIs
 
 ## Installation
 
@@ -131,3 +132,19 @@ Then, from within your project folder:
 npm run build
 surge public my-project.surge.sh
 ```
+
+## Configuration
+
+Configuration is through environment variables. You should put them in a `.env` file and then Rollup, through a plugin I configured, will replace place placeholders with the values when the app is built.
+
+This allows keeping the credentials out of the repository.
+
+These must show up in the code when I deploy the app, so trying to lock down the permissions on the application (in Google's configuration) as much as possible is a good idea.
+
+### `GOOGLE_API_KEY`
+
+API key for accessing Google APIs. See the Google API JavaScript client [getting started docs](https://github.com/google/google-api-javascript-client/blob/master/docs/start.md) for more information on how to create this credential.
+
+### `GOOGLE_CLIENT_ID`
+
+OAuth 2.0 client ID for accessing Google APIs. See the Google API JavaScript client [getting started docs](https://github.com/google/google-api-javascript-client/blob/master/docs/start.md) for more information on how to create this credential.
