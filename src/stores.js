@@ -1,7 +1,8 @@
-import { writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
-export const client = writable(null);
+export const messages = writable({});
 
-export const messages = writable([]);
-
-export const signedIn = writable(false);
+export const messageList = derived(
+  messages,
+  $messages => Object.values($messages)
+);

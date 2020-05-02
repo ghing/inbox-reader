@@ -13,6 +13,7 @@ function parseHeaders(headers) {
 
 function processMessage(msg) {
   return {
+    id: msg.id,
     headers: parseHeaders(msg.payload.headers),
     snippet: unescape(msg.snippet)
   };
@@ -22,7 +23,9 @@ const processedMessage = processMessage(message);
 </script>
 
 <li>
-  <span class="sender">{processedMessage.headers['From']}</span>
-  <span class="subject">{processedMessage.headers['Subject']}</span>
-  <span class="snippet">{processedMessage.snippet}</span>
+  <a href="/messages/{processedMessage.id}">
+    <span class="sender">{processedMessage.headers['From']}</span>
+    <span class="subject">{processedMessage.headers['Subject']}</span>
+    <span class="snippet">{processedMessage.snippet}</span>
+  </a>
 </li>
