@@ -1,59 +1,50 @@
-/* global gapi */
-import { derived, writable } from 'svelte/store';
+import { derived, readable, writable } from 'svelte/store';
 
-export const signedIn = writable(false);
+import GoogleApi from './gapi';
 
-export const messages = derived(signedIn, ($signedIn, set) => {
-  if (!$signedIn) {
-    set(null);
-    return;
+export const signedIn = readable(false, (set) => {
+  const updateSignedIn = async () => {
+    set(GoogleApi.isSignedIn());
+  };
+
+  GoogleApi.on('signin', updateSignedIn);
+  GoogleApi.on('signout', updateSignedIn);
+
+  // If I ever implement some kind of polling to refresh messsages, subscribe
+  // appropriately here.
+
+  // Return the stop function tat is called when the last subscriber unsubscribes.
+  return () => {
+    GoogleApi.off('signin', updateSignedIn);
+    GoogleApi.off('signout', updateSignedIn);
+  };
+});
+
+const messages = derived(
+  signedIn,
+  async ($signedIn, set) => {
+    const msgs = await GoogleApi.getMessages();
+    set(msgs);
   }
-
-  gapi.client.gmail.users.messages.list({
-    userId: 'me',
-    q: 'newer_than:5d label:foia'
-  }).then((response) => {
-    const batch = gapi.client.newBatch();
-    response.result.messages.forEach((msg) => {
-      batch.add(
-        gapi.client.gmail.users.messages.get({
-          userId: 'me',
-          id: msg.id
-        })
-      );
-    });
-
-    batch.then((response) => {
-      set(Object.values(response.result).reduce((msgLookup, msg) => {
-        const updated = {
-          ...msgLookup
-        };
-
-        updated[msg.result.id] = msg.result;
-
-        return updated;
-      }, {}));
-    });
-  });
-}); 
+);
 
 export const messageList = derived(
   messages,
   ($messages) => {
-    if ($messages === null) {
+    if (!$messages) {
       return [];
     }
-    
-    return Object.values($messages);
-  } 
+    const ml = Object.values($messages);
+    return ml;
+  }
 );
 
-export const requestedActiveMessageId = writable(null); 
+export const requestedActiveMessageId = writable(null);
 
 export const activeMessage = derived(
   [messages, requestedActiveMessageId],
   ([$messages, $requestedActiveMessageId]) => {
-    if ($messages === null || $requestedActiveMessageId === null) {
+    if (!$messages || !$requestedActiveMessageId) {
       return null;
     }
 

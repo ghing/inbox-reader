@@ -1,37 +1,15 @@
 <script>
-  /* global gapi */
   import router from 'page';
 
   import Home from './Home.svelte';
   import Message from './Message.svelte';
-  import { handleSignIn, initGapi } from './gapi';
-  import { activeMessage, messageList, signedIn , requestedActiveMessageId } from './stores';
+  import { activeMessage, messageList, requestedActiveMessageId, signedIn } from './stores';
+  import GoogleApi from './gapi';
 
   let page;
-  let props = {
-    messages: []
-  };
 
-  messageList.subscribe((ml) => {
-    props = {
-      ...props,
-      messages: ml
-    };
-  });
-
-  activeMessage.subscribe((msg) => {
-    props = {
-      ...props,
-      activeMessage: msg
-    };
-  });
-
-  function updateSigninStatus(isSignedIn) {
-    signedIn.set(isSignedIn);
-  }
-
-  function handleGapiLoad() {
-    gapi.load('client:auth2', () => initGapi(updateSigninStatus));
+  function handleSignIn() {
+    GoogleApi.signIn();
   }
 
   // Set up the pages to watch for
@@ -51,13 +29,8 @@
   router.start();
 </script>
 
-<svelte:head>
-  <script async defer src="https://apis.google.com/js/api.js" on:load={handleGapiLoad}>
-  </script>
-</svelte:head>
-
 <main>
-  <svelte:component on:signin={handleSignIn} this={page} {...props} />
+  <svelte:component on:signin={handleSignIn} this={page} signedIn={$signedIn} messages={$messageList} activeMessage={$activeMessage} />
 </main>
 
 <style>
