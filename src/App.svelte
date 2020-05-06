@@ -4,10 +4,10 @@
 
   import Home from './Home.svelte';
   import Message from './Message.svelte';
-  import { messages, messageList } from './stores';
+  import { handleSignIn, initGapi } from './gapi';
+  import { activeMessage, messageList, signedIn , requestedActiveMessageId } from './stores';
 
   let page;
-  let signedIn = false;
   let props = {
     messages: []
   };
@@ -19,63 +19,19 @@
     };
   });
 
+  activeMessage.subscribe((msg) => {
+    props = {
+      ...props,
+      activeMessage: msg
+    };
+  });
+
   function updateSigninStatus(isSignedIn) {
-    if (isSignedIn) {
-      gapi.client.gmail.users.messages.list({
-        userId: 'me',
-        q: 'newer_than:5d label:foia'
-      }).then((response) => {
-        const batch = gapi.client.newBatch();
-        response.result.messages.forEach((msg) => {
-          batch.add(
-            gapi.client.gmail.users.messages.get({
-              userId: 'me',
-              id: msg.id
-            })
-          );
-        });
-
-        batch.then((response) => {
-          messages.set(Object.values(response.result).reduce((msgLookup, msg) => {
-            const updated = {
-              ...msgLookup
-            };
-
-            updated[msg.result.id] = msg.result;
-
-            return updated;
-          }, {}));
-        });
-      });
-    }
-
-    signedIn = isSignedIn;
-  }
-
-  function initGapi() {
-    gapi.client.init({
-      // These credentials are replaced with environment variables by rollup
-      // eslint-disable-next-line no-undef
-      clientId: __GOOGLE_CLIENT_ID__,
-      // eslint-disable-next-line no-undef
-      apiKey: __GOOGLE_API_KEY__,
-      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
-      scope: 'https://www.googleapis.com/auth/gmail.readonly'
-    }).then(function () {
-      // Listen for sign-in state changes.
-      gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-
-      // Handle the initial sign-in state.
-      updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    });
+    signedIn.set(isSignedIn);
   }
 
   function handleGapiLoad() {
-    gapi.load('client:auth2', initGapi);
-  }
-
-  function handleSignIn() {
-    gapi.auth2.getAuthInstance().signIn();
+    gapi.load('client:auth2', () => initGapi(updateSigninStatus));
   }
 
   // Set up the pages to watch for
@@ -85,10 +41,7 @@
   router(
     '/messages/:id',
     (ctx, next) => {
-      props = {
-        ...props,
-        activeMessage: $messages[ctx.params.id]
-      };
+      requestedActiveMessageId.set(ctx.params.id);
       next();
     },
     () => page = Message
@@ -104,13 +57,7 @@
 </svelte:head>
 
 <main>
-  {#if signedIn}
-  <p>Logged in</p>
-  {:else}
-  <button on:click={handleSignIn}>Sign In</button>
-  {/if}
-
-  <svelte:component this={page} {...props} />
+  <svelte:component on:signin={handleSignIn} this={page} {...props} />
 </main>
 
 <style>
