@@ -7,11 +7,11 @@ export let messages = [];
 </script>
 
 <ul>
-  {#if signedIn}
+  {#if $signedIn}
   {#each messages as msg}
   <MessageListMessage message={msg} />
   {/each}
   {:else}
-  <SignInButton on:signin/>
+  <SignInButton on:signin />
   {/if}
 </ul>

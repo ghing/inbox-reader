@@ -3,7 +3,7 @@
 
   import Home from './Home.svelte';
   import Message from './Message.svelte';
-  import { activeMessage, messageList, requestedActiveMessageId, signedIn } from './stores';
+  import { activeMessage, messageList, requestedActiveMessageId } from './stores';
   import GoogleApi from './gapi';
 
   let page;
@@ -30,7 +30,7 @@
 </script>
 
 <main>
-  <svelte:component on:signin={handleSignIn} this={page} signedIn={$signedIn} messages={$messageList} activeMessage={$activeMessage} />
+  <svelte:component on:signin={handleSignIn} this={page} messages={$messageList} activeMessage={$activeMessage} />
 </main>
 
 <style>

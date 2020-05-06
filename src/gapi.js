@@ -42,7 +42,7 @@ class GoogleApi extends Emitter {
         });
 
         // Listen for sign-in state changes.
-        gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSignIn);
+        gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSignIn.bind(this));
 
         // Handle the initial sign-in state.
         this.updateSignIn(gapi.auth2.getAuthInstance().isSignedIn.get());

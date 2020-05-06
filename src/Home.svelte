@@ -4,4 +4,4 @@
   export let messages = [];
 </script>
 
-<MessageList messages={messages} />
+<MessageList messages={messages} on:signin />

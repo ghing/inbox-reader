@@ -11,7 +11,7 @@
 </script>
 
 <div>
-  {#if signedIn}
+  {#if $signedIn}
   <p>Signed in</p>
   {:else}
   <button on:click={handleClick}>Sign In</button>
